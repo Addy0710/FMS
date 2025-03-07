@@ -89,6 +89,22 @@
             border-radius: 5px;
         }
     </style>
+    <script>
+        function toggleDropdown() {
+            var vegRadio = document.getElementById('vegetable-radio');
+            var fruitRadio = document.getElementById('fruit-radio');
+            var vegDropdown = document.getElementById('vegetable-dropdown');
+            var fruitDropdown = document.getElementById('fruit-dropdown');
+            
+            if (vegRadio.checked) {
+                vegDropdown.style.display = 'block';
+                fruitDropdown.style.display = 'none';
+            } else if (fruitRadio.checked) {
+                fruitDropdown.style.display = 'block';
+                vegDropdown.style.display = 'none';
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="dashboard">
@@ -100,8 +116,34 @@
         <div class="sell-section">
             <h3>Sell Items</h3>
             <form>
-                <label><input type="radio" name="category"> <b>Vegetables</b></label>
-                <label><input type="radio" name="category"> <b>Fruits</b></label>
+                <label>
+                    <input type="radio" name="category" id="vegetable-radio" onclick="toggleDropdown()">
+                    <b>Vegetables</b>
+                </label>
+                <label>
+                    <input type="radio" name="category" id="fruit-radio" onclick="toggleDropdown()">
+                    <b>Fruits</b>
+                </label>
+                
+                <!-- Dropdown for Vegetables -->
+                <select id="vegetable-dropdown" style="display: none;">
+                    <option value="">Select Vegetable</option>
+                    <option value="cabbage">Cabbage</option>
+                    <option value="spinach">Spinach</option>
+                    <option value="carrot">Carrot</option>
+                    <option value="potato">Potato</option>
+                    <option value="tomato">Tomato</option>
+                </select>
+                
+                <!-- Dropdown for Fruits -->
+                <select id="fruit-dropdown" style="display: none;">
+                    <option value="">Select Fruit</option>
+                    <option value="apple">Apple</option>
+                    <option value="banana">Banana</option>
+                    <option value="orange">Orange</option>
+                    <option value="mango">Mango</option>
+                    <option value="grape">Grape</option>
+                </select>
                 
                 <label><b>Vegetable Plug Date</b></label>
                 <input type="date">
