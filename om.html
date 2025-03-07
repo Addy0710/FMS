@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        body {
+            background: linear-gradient(to right, #f3f4f6, #d1fae5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .dashboard {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .search-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 65%;
+            padding: 8px;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 18px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #388E3C;
+        }
+        .sell-section {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            font-size: 1.2em;
+        }
+        .sell-section label {
+            font-weight: bold;
+        }
+        .update-info {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            font-size: 1.2em;
+        }
+        .update-info label {
+            font-weight: bold;
+        }
+        .sell-section button, .update-info button {
+            margin-top: 5px;
+        }
+        h3 {
+            color: #388E3C;
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        select, input[type="date"], input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="search-bar">
+            <input type="text" placeholder="Search...">
+            <button>Search</button>
+        </div>
+        
+        <div class="sell-section">
+            <h3>Sell Items</h3>
+            <form>
+                <label><input type="radio" name="category"> <b>Vegetables</b></label>
+                <label><input type="radio" name="category"> <b>Fruits</b></label>
+                
+                <label><b>Vegetable Plug Date</b></label>
+                <input type="date">
+                
+                <label><b>Pincode:</b></label>
+                <input type="text" placeholder="Enter your pincode">
+                
+                <br>
+                <button type="submit">Sell</button>
+            </form>
+        </div>
+        
+        <div class="update-info">
+            <h3>Update Information</h3>
+            <form>
+                <label><b>Name:</b></label>
+                <input type="text" placeholder="Enter your name">
+                <label><b>Location:</b></label>
+                <input type="text" placeholder="Enter your farm location">
+                <label><b>Contact:</b></label>
+                <input type="text" placeholder="Enter your contact number">
+                <br>
+                <button type="submit">Update Info</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
