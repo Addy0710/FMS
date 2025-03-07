@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmers' Market Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        #map-container {
+            width: 80%;
+            max-width: 800px;
+            height: 500px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        #controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        #radius-slider {
+            width: 200px;
+        }
+        #refresh-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #refresh-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+    <div id="controls">
+        <label for="radius-slider">Select Radius: <span id="radius-value">5</span> km</label>
+        <input type="range" id="radius-slider" min="1" max="200" value="5">
+        <button id="refresh-btn">Refresh Location</button>
+    <button id="filter-btn">Filter Markets</button>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const defaultLocation = [20.5937, 78.9629];
+            const map = L.map("map").setView(defaultLocation, 5);
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: "&copy; OpenStreetMap contributors",
+            }).addTo(map);
+
+            let userMarker = null;
+            let radius = 5;
+            const userIcon = L.icon({
+                iconUrl: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -30]
+            });
+            const marketIcon = L.icon({
+                iconUrl: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -30]
+            });
+
+            const marketplaces = [
+                { name: "Palghar Super Market", lat: 19.6967, lng: 72.7652 },
+                { name: "Palghar Vegetables Market", lat: 19.6960, lng: 72.7648 },
+                { name: "Reliance SMART Superstore", lat: 19.6975, lng: 72.7630 },
+                { name: "मासळी बाजार (Masali Bazar - Fish Market)", lat: 19.6958, lng: 72.7625 },
+                { name: "Bhaji Market", lat: 19.6947, lng: 72.7633 },
+                { name: "Smoke shop (Thane market)", lat: 19.2183, lng: 72.9781 },
+                { name: "Jambhali Naka", lat: 19.2030, lng: 72.9742 },
+                { name: "THANE MARKET", lat: 19.1979, lng: 72.9722 },
+                { name: "Laxmi Market", lat: 19.2047, lng: 72.9788 },
+                { name: "Waghbil street market", lat: 19.2451, lng: 72.9655 },
+                { name: "Navi Mumbai APMC", lat: 19.0330, lng: 73.0297 },
+                { name: "Pune APMC", lat: 18.5167, lng: 73.8563 },
+                { name: "Nashik APMC", lat: 19.9975, lng: 73.7898 },
+                { name: "Chhatrapati Sambhajinagar APMC", lat: 19.8762, lng: 75.3433 },
+                { name: "Nagpur APMC", lat: 21.1458, lng: 79.0882 },
+                { name: "Solapur APMC", lat: 17.6599, lng: 75.9064 },
+                { name: "Kolhapur APMC", lat: 16.7050, lng: 74.2433 },
+                { name: "Sangli APMC", lat: 16.8524, lng: 74.5815 },
+                { name: "Satara APMC", lat: 17.6850, lng: 74.0111 },
+                { name: "Akola APMC", lat: 20.7096, lng: 77.0020 },
+                { name: "Amravati APMC", lat: 20.9374, lng: 77.7796 },
+                { name: "Jalgaon APMC", lat: 21.0077, lng: 75.5626 },
+                { name: "Dhule APMC", lat: 20.9042, lng: 74.7749 },
+                { name: "Lasalgaon", lat: 20.1355, lng: 74.2465 },
+                { name: "Pimpalgaon Baswant", lat: 20.1653, lng: 73.9917 },
+                { name: "Rahuri", lat: 19.3902, lng: 74.6491 },
+                { name: "Manchar", lat: 19.0050, lng: 73.9439 },
+                { name: "Shirur", lat: 18.8276, lng: 74.3744 },
+                { name: "Khed", lat: 17.7178, lng: 73.3964 },
+                { name: "Wai", lat: 17.9424, lng: 73.8903 },
+                { name: "Malegaon", lat: 20.5537, lng: 74.5288 },
+                { name: "Dondaicha", lat: 21.3259, lng: 74.5660 }
+            ];
+
+            function getDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371;
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return R * c;
+            }
+
+            function findNearbyMarkets(userLat, userLng) {
+                return marketplaces.filter(market => getDistance(userLat, userLng, market.lat, market.lng) <= radius);
+            }
+
+            function updateUserLocation(position) {
+                const userLocation = [position.coords.latitude, position.coords.longitude];
+                map.setView(userLocation, 12);
+                if (userMarker) map.removeLayer(userMarker);
+                userMarker = L.marker(userLocation, { icon: userIcon }).addTo(map).bindPopup("You are here!").openPopup();
+                map.eachLayer(layer => {
+                    if (layer instanceof L.Marker && layer !== userMarker) map.removeLayer(layer);
+                });
+                findNearbyMarkets(userLocation[0], userLocation[1]).forEach(market => {
+                    L.marker([market.lat, market.lng], { icon: marketIcon }).addTo(map).bindPopup(`Nearby Market: ${market.name}`);
+                });
+            }
+
+            function getLiveLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(updateUserLocation, () => alert("Location access denied."));
+                } else {
+                    alert("Geolocation not supported.");
+                }
+            }
+
+            document.getElementById("radius-slider").addEventListener("input", function () {
+                radius = this.value;
+                document.getElementById("radius-value").textContent = radius;
+            });
+
+            document.getElementById("refresh-btn").addEventListener("click", getLiveLocation);
+            
+            document.getElementById("filter-btn").addEventListener("click", function () {
+                if (userMarker) {
+                    const userLat = userMarker.getLatLng().lat;
+                    const userLng = userMarker.getLatLng().lng;
+                    map.eachLayer(layer => {
+                        if (layer instanceof L.Marker && layer !== userMarker) map.removeLayer(layer);
+                    });
+                    findNearbyMarkets(userLat, userLng).forEach(market => {
+                        L.marker([market.lat, market.lng], { icon: marketIcon }).addTo(map).bindPopup(`Nearby Market: ${market.name}`);
+                    });
+                }
+            });
+            getLiveLocation();
+        });
+    </script>
+</body>
+</html>
